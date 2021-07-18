@@ -1,0 +1,10 @@
+# Database setting
+database:
+  uri: 'mongodb://localhost:27017'
+  db: 'twitterclone'
+  timeout: 5
+
+#Server setting
+server:
+  host: 'localhost'
+  port: '3030'
