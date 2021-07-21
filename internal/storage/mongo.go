@@ -10,7 +10,7 @@ import (
 )
 
 func NewMongoClient() (*mongo.Client, error) {
-    setting, err := config.GetConfig("../cmd/config/config.yml")
+    setting, err := config.GetConfig()
 
     if err != nil {
         panic("fail load config")

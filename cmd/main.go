@@ -11,7 +11,11 @@ const defaultPort string = "8080"
 
 func main() {
    log.Println("Starting API cmd")
-   setting, _ := config.GetConfig("./config/config.yml")
+   setting, err := config.GetConfig()
+
+   if err != nil {
+       log.Fatal(err.Error())
+   }
 
    port := setting.Server.Port
 

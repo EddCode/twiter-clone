@@ -22,8 +22,8 @@ type config struct {
 	Server   server   `yaml:"server"`
 }
 
-func GetConfig(configFile string) (*config, error) {
-    file, err := os.Open(configFile)
+func GetConfig() (*config, error) {
+    file, err := os.Open("cmd/config/config.yml")
 
     if err != nil {
         return nil, err
