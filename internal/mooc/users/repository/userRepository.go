@@ -2,7 +2,6 @@ package users
 
 import (
 	"errors"
-	"log"
 
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,15 +15,24 @@ type UserRepository interface {
 }
 
 type ServiceRepository struct {
-	db *mongo.Client
+	Repository *Repository
 }
 
 func NewUserRepository(db *mongo.Client) UserRepository {
-	return &ServiceRepository{db: db}
+	return &ServiceRepository{ Repository: NewRepository(db) }
 }
 
 func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, error) {
-	log.Printf("execute singup repository function user info %v", user)
+
+    _, errExist := repo.Repository.IsUserExist(user.Email)
+
+    if errExist != nil {
+        return nil, errExist
+    }
+
+    //if userExist != nil {
+    //    return nil, errors.New("User already exist")
+    //}
 
     if len(user.Email) == 0 {
         return nil, errors.New("Missing email")
@@ -44,6 +52,12 @@ func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, er
         Phone: user.Phone,
         Email: user.Email,
         Password: user.Password,
+    }
+
+    _, err := repo.Repository.StoreUser(newUser)
+
+    if err != nil {
+        return nil, err
     }
 
     return newUser, nil
