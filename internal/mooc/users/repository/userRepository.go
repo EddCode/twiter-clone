@@ -24,15 +24,11 @@ func NewUserRepository(db *mongo.Client) UserRepository {
 
 func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, error) {
 
-    _, errExist := repo.Repository.IsUserExist(user.Email)
+    _, errExist, _ := repo.Repository.IsUserExist(user.Email)
 
-    if errExist != nil {
-        return nil, errExist
+    if errExist {
+        return nil, errors.New("User already exist")
     }
-
-    //if userExist != nil {
-    //    return nil, errors.New("User already exist")
-    //}
 
     if len(user.Email) == 0 {
         return nil, errors.New("Missing email")

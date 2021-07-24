@@ -41,7 +41,7 @@ func (service *Service) SingupHandler(w http.ResponseWriter, r *http.Request) {
     }
 
     log.Print(user)
-    httpresponse.Success(&newUser, 200).Send(w)
+    httpresponse.Success(&newUser, 201).Send(w)
 }
 
 func (service *Service) FindHandler(w http.ResponseWriter, r *http.Request) {

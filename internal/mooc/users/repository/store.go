@@ -46,7 +46,7 @@ func (repo *Repository)  StoreUser(user *users.User) (*mongo.InsertOneResult, er
     return result, nil
 }
 
-func (repo *Repository) IsUserExist(email string) (*users.User, error) {
+func (repo *Repository) IsUserExist(email string) (*users.User, bool, string) {
     ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
     defer cancel()
 
@@ -58,12 +58,12 @@ func (repo *Repository) IsUserExist(email string) (*users.User, error) {
     var result users.User
 
     err := collection.FindOne(ctx, condition).Decode(&result)
-    log.Print("try to find something", err)
+    ID := result.ID.Hex()
 
     if err != nil {
-        return &result, nil
+        return &result, false, ID
     }
 
-    return &result, nil
+    return &result, true, ID
 
 }
