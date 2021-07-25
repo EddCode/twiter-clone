@@ -26,3 +26,12 @@ type SingupUser struct {
     Email       string              `bson:"email" json:"email"`
     Password    string              `bson:"password,omitempty" json:"password,omitempty"`
 }
+
+type UserLogin struct {
+    Email    string
+    Password string
+}
+
+type UserToken struct {
+    Token string
+}

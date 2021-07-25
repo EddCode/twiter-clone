@@ -17,9 +17,14 @@ type server struct {
 	Host string `yaml:"host"`
 }
 
+type token struct {
+    Secret string `yaml:"secret"`
+}
+
 type config struct {
 	Database database `yaml:"database"`
 	Server   server   `yaml:"server"`
+    Token token `yaml:"token"`
 }
 
 func GetConfig() (*config, error) {

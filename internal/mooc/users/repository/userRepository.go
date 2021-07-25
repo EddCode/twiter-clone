@@ -3,13 +3,16 @@ package users
 import (
 	"errors"
 
+	"github.com/EddCode/twitter-clone/cmd/config"
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
+	"github.com/EddCode/twitter-clone/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepository interface {
 	Singup(user *models.SingupUser) (*models.User, error)
+    Login(user *models.UserLogin)(*models.UserToken, error)
 	Store()
 	Find()
 }
@@ -57,6 +60,36 @@ func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, er
     }
 
     return newUser, nil
+}
+
+func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserToken, error) {
+
+    if userLogin.Email == " " || len(userLogin.Password) < 6 {
+        return nil, errors.New("Email/Password are incorect")
+    }
+
+
+    user, foundUser, _ := repo.Repository.IsUserExist(userLogin.Email)
+
+    if foundUser == false {
+        return nil, errors.New("Password / Email was wrong")
+    }
+
+    setting, errSetting := config.GetConfig()
+
+    if errSetting != nil {
+        return nil, errSetting
+    }
+
+    tokenSigned, errToken := utils.BuildJWT(user, setting.Token.Secret)
+
+    if errToken != nil {
+        return nil, errToken
+    }
+
+    token := &models.UserToken{ Token: tokenSigned}
+
+    return token, nil
 }
 
 func (repo *ServiceRepository) Find() {
