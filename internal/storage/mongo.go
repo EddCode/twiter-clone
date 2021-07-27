@@ -55,7 +55,6 @@ func NewMongoClient() (*Database, error) {
 			return nil, err
 		}
 
-		log.Printf("creating new db conecction %+v \n", db.Client)
 		return db, nil
 	}
 

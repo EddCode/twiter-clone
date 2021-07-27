@@ -26,6 +26,6 @@ func (srv *server) Run() {
 
 	log.Printf("Api is ready to handle request %s", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal("Could not listen on #{srv.Addr} due to #{err.Error()}")
+		log.Fatalf(`Could not listen on %s due to %s`, srv.Addr, err.Error())
 	}
 }
