@@ -6,13 +6,13 @@ import (
 	"github.com/rs/cors"
 )
 
-func Start(port string)  {
-    db, _ := storage.NewMongoClient()
+func Start(port string) {
+	db, _ := storage.NewMongoClient()
 
-    router := routes(users.NewUserService(db))
-    handler := cors.AllowAll().Handler(router)
+	router := routes(users.NewUserService(db.Client))
+	handler := cors.AllowAll().Handler(router)
 
-    server := newServer(port, handler)
+	server := newServer(port, handler)
 
-    server.Run()
+	server.Run()
 }

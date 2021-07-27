@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -18,31 +19,39 @@ type server struct {
 }
 
 type token struct {
-    Secret string `yaml:"secret"`
+	Secret string `yaml:"secret"`
 }
 
 type config struct {
 	Database database `yaml:"database"`
 	Server   server   `yaml:"server"`
-    Token token `yaml:"token"`
+	Token    token    `yaml:"token"`
 }
 
+var setting *config
+
 func GetConfig() (*config, error) {
-    file, err := os.Open("cmd/config/config.yml")
+	if setting == nil {
+		file, err := os.Open("cmd/config/config.yml")
 
-    if err != nil {
-        return nil, err
-    }
+		if err != nil {
+			return nil, err
+		}
 
-    defer file.Close()
+		defer file.Close()
 
-    setting := &config{}
-    yd := yaml.NewDecoder(file)
-    err = yd.Decode(setting)
+		setting = &config{}
+		yd := yaml.NewDecoder(file)
+		err = yd.Decode(setting)
 
-    if err != nil {
-        return nil, err
-    }
+		if err != nil {
+			return nil, err
+		}
 
-    return setting, nil
+		log.Println("New settings instance")
+		return setting, nil
+	}
+
+	log.Println("Already settings instance created")
+	return setting, nil
 }

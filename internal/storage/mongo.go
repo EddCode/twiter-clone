@@ -9,29 +9,55 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewMongoClient() (*mongo.Client, error) {
-    setting, err := config.GetConfig()
+type Database struct {
+	Client *mongo.Client
+}
 
-    if err != nil {
-        panic("fail load config")
-    }
+var db *Database
 
-    options := options.Client().ApplyURI(setting.Database.URL)
-    client, mongoErr := mongo.Connect(context.TODO(), options)
+func (db Database) getConnection() (*mongo.Client, error) {
+	setting, err := config.GetConfig()
 
-    if mongoErr != nil {
-        log.Fatal(mongoErr.Error())
-        return nil, mongoErr
-    }
+	if err != nil {
+		panic("fail load config")
+	}
 
-    mongoErr = client.Ping(context.TODO(), nil)
+	options := options.Client().ApplyURI(setting.Database.URL)
+	client, mongoErr := mongo.Connect(context.TODO(), options)
 
-    if mongoErr != nil {
-        log.Fatal(mongoErr.Error())
-        return nil, mongoErr
-    }
+	if mongoErr != nil {
+		log.Fatal(mongoErr.Error())
+		return nil, mongoErr
+	}
 
-    log.Println("Succesful conextion into DB")
-    return client, nil
+	mongoErr = client.Ping(context.TODO(), nil)
 
+	if mongoErr != nil {
+		log.Fatal(mongoErr.Error())
+		return nil, mongoErr
+	}
+
+	log.Println("Succesful conextion into DB")
+	return client, nil
+
+}
+
+func NewMongoClient() (*Database, error) {
+	log.Println("Creting db conecction")
+
+	if db == nil {
+		db = &Database{}
+		client, err := db.getConnection()
+
+		db.Client = client
+
+		if err != nil {
+			return nil, err
+		}
+
+		log.Printf("creating new db conecction %+v \n", db.Client)
+		return db, nil
+	}
+
+	return db, nil
 }

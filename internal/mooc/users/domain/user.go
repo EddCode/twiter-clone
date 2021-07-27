@@ -33,5 +33,5 @@ type UserLogin struct {
 }
 
 type UserToken struct {
-    Token string
+    Token string `json:"token,omitempty"`
 }
