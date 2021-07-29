@@ -29,7 +29,7 @@ func (service *Service) SingupHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(body).Decode(&user)
 
 	if err != nil {
-		httpresponse.BadRequest("invalid json").Send(w)
+		httpresponse.BadRequest("missing data").Send(w)
 		return
 	}
 
@@ -52,14 +52,14 @@ func (service *Service) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(body).Decode(&user)
 
 	if err != nil {
-		httpresponse.BadRequest("email/password is ivalid").Send(w)
+		httpresponse.BadRequest("missing data").Send(w)
 		return
 	}
 
-	token, err := service.userRepository.Login(&user)
+	token, errLogin := service.userRepository.Login(&user)
 
-	if err != nil {
-		httpresponse.UnauthoriedRequest(err.Error()).Send(w)
+	if errLogin != nil {
+		httpresponse.UnauthoriedRequest(errLogin.Error()).Send(w)
 	}
 
 	cookie := &http.Cookie{

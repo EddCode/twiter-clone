@@ -12,15 +12,16 @@ type httpError struct {
 }
 
 func BadRequest(msg string) httpError {
-    return httpError{StatusCode: http.StatusBadRequest, Type: "api_error", Message: msg}
+	return httpError{StatusCode: http.StatusBadRequest, Type: "api_error", Message: msg}
 }
 
 func UnauthoriedRequest(msg string) httpError {
-    return httpError{StatusCode: http.StatusUnauthorized, Type: "api_unauthorze", Message: msg}
+	return httpError{StatusCode: http.StatusUnauthorized, Type: "api_unauthorze", Message: msg}
 }
 
 func (e httpError) Send(w http.ResponseWriter) error {
 	statusCode := e.StatusCode
+
 	if statusCode == 0 {
 		statusCode = http.StatusBadRequest
 	}

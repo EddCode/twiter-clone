@@ -8,6 +8,7 @@ import (
 	"github.com/EddCode/twitter-clone/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
@@ -70,7 +71,12 @@ func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserT
 
 	user, foundUser, _ := repo.IsUserExist(userLogin.Email)
 
-	if foundUser == false {
+	userPwd := []byte(userLogin.Password)
+	hashedPwd := []byte(user.Password)
+
+	pwdErr := bcrypt.CompareHashAndPassword(hashedPwd, userPwd)
+
+	if foundUser == false || pwdErr != nil {
 		return nil, errors.New("Password / Email was wrong")
 	}
 
