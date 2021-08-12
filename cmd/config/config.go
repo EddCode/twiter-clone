@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -48,10 +47,8 @@ func GetConfig() (*config, error) {
 			return nil, err
 		}
 
-		log.Println("New settings instance")
 		return setting, nil
 	}
 
-	log.Println("Already settings instance created")
 	return setting, nil
 }
