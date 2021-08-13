@@ -2,6 +2,7 @@ package users
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -74,7 +75,8 @@ func (service *Service) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	httpresponse.Success(token, http.StatusOK).Send(w)
 }
 
-func (service *Service) FindHandler(w http.ResponseWriter, r *http.Request) {
+func (service *Service) ProfileHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("execiting Profile")
 	service.userRepository.Find()
 }
 
