@@ -48,7 +48,7 @@ func ValidToken(token string) (*Claims, error) {
 	tokenKey := []byte(setting.Token.Secret)
 	claim := &Claims{}
 
-	splitToken := strings.Split(token, "Bearera")
+	splitToken := strings.Split(token, "Bearer")
 
 	if len(splitToken) != 2 {
 		return nil, errors.New("invalid token")

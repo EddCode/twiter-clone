@@ -2,7 +2,6 @@ package users
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"time"
 
@@ -41,7 +40,7 @@ func (service *Service) SingupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpresponse.Success(&newUser, 201).Send(w)
+	httpresponse.Success(&newUser, http.StatusCreated).Send(w)
 }
 
 func (service *Service) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -76,8 +75,21 @@ func (service *Service) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (service *Service) ProfileHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("execiting Profile")
-	service.userRepository.Find()
+	id := r.URL.Query().Get("id")
+
+	if len(id) < 1 {
+		httpresponse.BadRequest("missing parameters").Send(w)
+		return
+	}
+
+	userProfile, err := service.userRepository.GetUserProfile(id)
+
+	if err != nil {
+		httpresponse.BadRequest(err.Error()).Send(w)
+		return
+	}
+
+	httpresponse.Success(&userProfile, http.StatusOK).Send(w)
 }
 
 func (service *Service) StoreHandler(w http.ResponseWriter, r *http.Request) {

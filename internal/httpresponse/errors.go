@@ -15,6 +15,10 @@ func BadRequest(msg string) httpError {
 	return httpError{StatusCode: http.StatusBadRequest, Type: "Bad Request", Message: msg}
 }
 
+func NotFound(msg string) httpError {
+	return httpError{StatusCode: http.StatusNotFound, Type: "Unknown", Message: msg}
+}
+
 func UnauthoriedRequest(msg string) httpError {
 	return httpError{StatusCode: http.StatusUnauthorized, Type: "Unauthorze", Message: msg}
 }

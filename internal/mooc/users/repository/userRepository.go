@@ -15,7 +15,7 @@ type UserRepository interface {
 	Singup(user *models.SingupUser) (*models.User, error)
 	Login(user *models.UserLogin) (*models.UserToken, error)
 	Store()
-	Find()
+	GetUserProfile(id string) (*models.User, error)
 }
 
 type ServiceRepository struct {
@@ -97,7 +97,14 @@ func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserT
 	return token, nil
 }
 
-func (repo *ServiceRepository) Find() {
+func (repo *ServiceRepository) GetUserProfile(id string) (profile *models.User, err error) {
+	profile, err = repo.getUserById(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return profile, nil
 
 }
 

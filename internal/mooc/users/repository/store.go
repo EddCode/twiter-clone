@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	users "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
+	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
 	"github.com/EddCode/twitter-clone/utils"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -18,7 +19,7 @@ func NewRepository(db *mongo.Client) *Repository {
 	return &Repository{connection: db}
 }
 
-func (repo *Repository) StoreUser(user *users.User) (*mongo.InsertOneResult, error) {
+func (repo *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -42,7 +43,7 @@ func (repo *Repository) StoreUser(user *users.User) (*mongo.InsertOneResult, err
 	return result, nil
 }
 
-func (repo *Repository) IsUserExist(email string) (*users.User, bool, string) {
+func (repo *Repository) IsUserExist(email string) (*models.User, bool, string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -51,7 +52,7 @@ func (repo *Repository) IsUserExist(email string) (*users.User, bool, string) {
 
 	condition := bson.M{"email": email}
 
-	var result users.User
+	var result models.User
 
 	err := collection.FindOne(ctx, condition).Decode(&result)
 	ID := result.ID.Hex()
@@ -61,5 +62,26 @@ func (repo *Repository) IsUserExist(email string) (*users.User, bool, string) {
 	}
 
 	return &result, true, ID
+
+}
+
+func (repo *Repository) getUserById(id string) (*models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	db := repo.connection.Database("twitterclone")
+	collection := db.Collection("Users")
+	objectId, _ := primitive.ObjectIDFromHex(id)
+
+	condition := bson.M{"_id": objectId}
+
+	var profile models.User
+	err := collection.FindOne(ctx, condition).Decode(&profile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &profile, nil
 
 }
