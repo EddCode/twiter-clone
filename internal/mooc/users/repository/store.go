@@ -1,15 +1,15 @@
 package users
 
 import (
-	"context"
-	"time"
-
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
+	"github.com/EddCode/twitter-clone/internal/storage"
 	"github.com/EddCode/twitter-clone/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var collectionName string = "Users"
 
 type Repository struct {
 	connection *mongo.Client
@@ -20,11 +20,8 @@ func NewRepository(db *mongo.Client) *Repository {
 }
 
 func (repo *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
-
-	db := repo.connection.Database("twitterclone")
-	collection := db.Collection("Users")
 
 	password, errToHash := utils.HashPassword(user.Password, 6)
 
@@ -44,11 +41,8 @@ func (repo *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, er
 }
 
 func (repo *Repository) IsUserExist(email string) (*models.User, bool, string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
-
-	db := repo.connection.Database("twitterclone")
-	collection := db.Collection("Users")
 
 	condition := bson.M{"email": email}
 
@@ -66,11 +60,9 @@ func (repo *Repository) IsUserExist(email string) (*models.User, bool, string) {
 }
 
 func (repo *Repository) getUserById(id string) (*models.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
 
-	db := repo.connection.Database("twitterclone")
-	collection := db.Collection("Users")
 	objectId, _ := primitive.ObjectIDFromHex(id)
 
 	condition := bson.M{"_id": objectId}
