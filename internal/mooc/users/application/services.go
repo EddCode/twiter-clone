@@ -92,6 +92,20 @@ func (service *Service) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	httpresponse.Success(&userProfile, http.StatusOK).Send(w)
 }
 
-func (service *Service) StoreHandler(w http.ResponseWriter, r *http.Request) {
-	service.userRepository.Store()
+func (service *Service) UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
+	body := r.Body
+	defer body.Close()
+
+	var userProfile models.User
+
+	err := json.NewDecoder(body).Decode(&userProfile)
+
+	if err != nil {
+		httpresponse.BadRequest("Incorrect data").Send(w)
+	}
+
+	service.userRepository.UpdateUserProfile(userProfile)
+
+	httpresponse.Success()
+
 }

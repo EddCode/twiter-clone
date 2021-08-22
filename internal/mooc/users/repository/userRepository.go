@@ -14,8 +14,8 @@ import (
 type UserRepository interface {
 	Singup(user *models.SingupUser) (*models.User, error)
 	Login(user *models.UserLogin) (*models.UserToken, error)
-	Store()
 	GetUserProfile(id string) (*models.User, error)
+	UpdateUserProfile(user models.User, id string) (bool, error)
 }
 
 type ServiceRepository struct {
@@ -108,6 +108,13 @@ func (repo *ServiceRepository) GetUserProfile(id string) (profile *models.User, 
 
 }
 
-func (repo *ServiceRepository) Store() {
+func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, error) {
+	userProfile := make(map[string]{interface})
+	updated, err := repo.updateUserProfile(userProfile, utils.Claim.ID)
 
+	if err != nil {
+		return err
+	}
+
+	return updated, nil
 }

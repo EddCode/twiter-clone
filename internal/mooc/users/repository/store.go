@@ -1,6 +1,8 @@
 package users
 
 import (
+	"os/user"
+
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
 	"github.com/EddCode/twitter-clone/internal/storage"
 	"github.com/EddCode/twitter-clone/utils"
@@ -76,4 +78,25 @@ func (repo *Repository) getUserById(id string) (*models.User, error) {
 
 	return &profile, nil
 
+}
+
+func (repo *Repository) updateUserProfile(user models.User, id primitive.ObjectID) (bool, error) {
+	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+	defer cancel()
+
+	condition := bson.M{
+		"_id": bson.M{"$eq": id},
+	}
+
+	updatedData := bson.M{
+		"$set": user,
+	}
+
+	_, mongoError := collection.UpdateOne(ctx, condition, updatedData)
+
+	if mongoError != nil {
+		return false, mongoError
+	}
+
+	return true, nil
 }

@@ -12,6 +12,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+var Claim *Claims
+
 func HashPassword(password string, cost int) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 
@@ -46,7 +48,7 @@ func ValidToken(token string) (*Claims, error) {
 	}
 
 	tokenKey := []byte(setting.Token.Secret)
-	claim := &Claims{}
+	Claim = &Claims{}
 
 	splitToken := strings.Split(token, "Bearer")
 
@@ -56,7 +58,7 @@ func ValidToken(token string) (*Claims, error) {
 
 	token = strings.TrimSpace(splitToken[1])
 
-	_, err := jwt.ParseWithClaims(token, claim, func(t *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(token, Claim, func(t *jwt.Token) (interface{}, error) {
 		return tokenKey, nil
 	})
 
@@ -64,5 +66,5 @@ func ValidToken(token string) (*Claims, error) {
 		return nil, err
 	}
 
-	return claim, nil
+	return Claim, nil
 }
