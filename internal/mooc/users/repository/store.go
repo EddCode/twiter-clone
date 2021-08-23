@@ -1,7 +1,7 @@
 package users
 
 import (
-	"os/user"
+	"log"
 
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
 	"github.com/EddCode/twitter-clone/internal/storage"
@@ -80,7 +80,7 @@ func (repo *Repository) getUserById(id string) (*models.User, error) {
 
 }
 
-func (repo *Repository) updateUserProfile(user models.User, id primitive.ObjectID) (bool, error) {
+func (repo *Repository) updateUserProfile(user interface{}, id primitive.ObjectID) (bool, error) {
 	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
 
@@ -92,6 +92,7 @@ func (repo *Repository) updateUserProfile(user models.User, id primitive.ObjectI
 		"$set": user,
 	}
 
+	log.Println("logg ====>", updatedData)
 	_, mongoError := collection.UpdateOne(ctx, condition, updatedData)
 
 	if mongoError != nil {

@@ -12,6 +12,7 @@ func routes(userService *users.Service) *mux.Router {
 	router.HandleFunc("/singup", userService.SingupHandler).Methods("Post")
 	router.HandleFunc("/login", userService.LoginHandler).Methods("POST")
 	router.HandleFunc("/profile", middlewares.AttachMiddelwares(userService.ProfileHandler, middlewares.ValidJWT())).Methods("GET")
+	router.HandleFunc("/update-profile", middlewares.AttachMiddelwares(userService.UpdateProfileHandler, middlewares.ValidJWT())).Methods("PUT")
 
 	return router
 }

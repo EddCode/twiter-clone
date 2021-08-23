@@ -106,6 +106,6 @@ func (service *Service) UpdateProfileHandler(w http.ResponseWriter, r *http.Requ
 
 	service.userRepository.UpdateUserProfile(userProfile)
 
-	httpresponse.Success()
+	httpresponse.Success(userProfile, http.StatusOK).Send(w)
 
 }

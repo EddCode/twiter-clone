@@ -2,6 +2,8 @@ package users
 
 import (
 	"errors"
+	"reflect"
+	"strings"
 
 	"github.com/EddCode/twitter-clone/cmd/config"
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
@@ -15,7 +17,7 @@ type UserRepository interface {
 	Singup(user *models.SingupUser) (*models.User, error)
 	Login(user *models.UserLogin) (*models.UserToken, error)
 	GetUserProfile(id string) (*models.User, error)
-	UpdateUserProfile(user models.User, id string) (bool, error)
+	UpdateUserProfile(user models.User) (bool, error)
 }
 
 type ServiceRepository struct {
@@ -109,11 +111,25 @@ func (repo *ServiceRepository) GetUserProfile(id string) (profile *models.User, 
 }
 
 func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, error) {
-	userProfile := make(map[string]{interface})
+	userProfile := make(map[string]interface{})
+
+	fields := reflect.TypeOf(user)
+	values := reflect.ValueOf(user)
+
+	for i := 0; i < fields.NumField(); i++ {
+		field := fields.Field(i)
+		value := values.Field(i)
+
+		if !value.IsZero() {
+			key := strings.ToLower(field.Name)
+			userProfile[key] = value
+		}
+	}
+
 	updated, err := repo.updateUserProfile(userProfile, utils.Claim.ID)
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	return updated, nil
