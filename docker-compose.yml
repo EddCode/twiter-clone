@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+  twitter:
+    container_name: twitterclone
+    build: .
+    ports:
+      - 5000:5000
+    volumes:
+      - ./:/usr/app
