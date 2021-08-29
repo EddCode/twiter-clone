@@ -29,14 +29,14 @@ func (service *Service) SingupHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(body).Decode(&user)
 
 	if err != nil {
-		httpresponse.BadRequest("Missing email/password").Send(w)
+		httpresponse.Error("BadRequest", "Missing email/password").Send(w)
 		return
 	}
 
 	newUser, err := service.userRepository.Singup(&user)
 
 	if err != nil {
-		httpresponse.BadRequest(err.Error()).Send(w)
+		httpresponse.Error(err.Error(), err.Error()).Send(w)
 		return
 	}
 
@@ -52,14 +52,14 @@ func (service *Service) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(body).Decode(&user)
 
 	if err != nil {
-		httpresponse.BadRequest("Missing email/password").Send(w)
+		httpresponse.Error("BadRequest", "Missing email/password").Send(w)
 		return
 	}
 
 	token, errLogin := service.userRepository.Login(&user)
 
 	if errLogin != nil {
-		httpresponse.UnauthoriedRequest(errLogin.Error()).Send(w)
+		httpresponse.Error(errLogin.ErrorType(), errLogin.Error()).Send(w)
 		return
 	}
 
@@ -78,14 +78,14 @@ func (service *Service) ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 
 	if len(id) < 1 {
-		httpresponse.BadRequest("missing parameters").Send(w)
+		httpresponse.Error("BadRequest", "missing parameters")
 		return
 	}
 
 	userProfile, err := service.userRepository.GetUserProfile(id)
 
 	if err != nil {
-		httpresponse.BadRequest(err.Error()).Send(w)
+		httpresponse.Error(err.ErrorType(), err.Error()).Send(w)
 		return
 	}
 
@@ -101,10 +101,14 @@ func (service *Service) UpdateProfileHandler(w http.ResponseWriter, r *http.Requ
 	err := json.NewDecoder(body).Decode(&userProfile)
 
 	if err != nil {
-		httpresponse.BadRequest("Incorrect data").Send(w)
+		httpresponse.Error("BadRequest", "Incorrect data").Send(w)
 	}
 
-	service.userRepository.UpdateUserProfile(userProfile)
+	_, errProfile := service.userRepository.UpdateUserProfile(userProfile)
+
+	if err != nil {
+		httpresponse.Error(errProfile.ErrorType(), errProfile.Error()).Send(w)
+	}
 
 	httpresponse.Success(userProfile, http.StatusOK).Send(w)
 

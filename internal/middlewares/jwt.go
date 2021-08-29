@@ -12,7 +12,7 @@ func ValidJWT() middlewares {
 		return func(rw http.ResponseWriter, r *http.Request) {
 			_, err := utils.ValidToken(r.Header.Get("Authorization"))
 			if err != nil {
-				httpresponse.UnauthoriedRequest(err.Error()).Send(rw)
+				httpresponse.Error("Unauthorized", err.Error()).Send(rw)
 				return
 			}
 

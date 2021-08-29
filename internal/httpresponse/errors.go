@@ -11,16 +11,37 @@ type httpError struct {
 	Message    string `json:"message,omitempty"`
 }
 
-func BadRequest(msg string) httpError {
+func badRequest(msg string) httpError {
 	return httpError{StatusCode: http.StatusBadRequest, Type: "Bad Request", Message: msg}
 }
 
-func NotFound(msg string) httpError {
+func notFound(msg string) httpError {
 	return httpError{StatusCode: http.StatusNotFound, Type: "Unknown", Message: msg}
 }
 
-func UnauthoriedRequest(msg string) httpError {
+func unauthoriedRequest(msg string) httpError {
 	return httpError{StatusCode: http.StatusUnauthorized, Type: "Unauthorze", Message: msg}
+}
+
+func internalServerError(msg string) httpError {
+	return httpError{StatusCode: http.StatusInternalServerError, Type: "Unauthorze", Message: msg}
+}
+
+func Error(errorType string, msg string) httpError {
+	var err httpError
+
+	switch errorType {
+	case "Unauthorized":
+		err = unauthoriedRequest(msg)
+	case "Unknown":
+		err = notFound(msg)
+	case "BadRequest":
+		err = badRequest(msg)
+	default:
+		err = internalServerError(msg)
+	}
+
+	return err
 }
 
 func (e httpError) Send(w http.ResponseWriter) error {

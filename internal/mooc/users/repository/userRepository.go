@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/EddCode/twitter-clone/cmd/config"
+	"github.com/EddCode/twitter-clone/internal/application/customError"
 	models "github.com/EddCode/twitter-clone/internal/mooc/users/domain"
 	"github.com/EddCode/twitter-clone/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,10 +15,10 @@ import (
 )
 
 type UserRepository interface {
-	Singup(user *models.SingupUser) (*models.User, error)
-	Login(user *models.UserLogin) (*models.UserToken, error)
-	GetUserProfile(id string) (*models.User, error)
-	UpdateUserProfile(user models.User) (bool, error)
+	Singup(user *models.SingupUser) (*models.User, *customError.CustomError)
+	Login(user *models.UserLogin) (*models.UserToken, *customError.CustomError)
+	GetUserProfile(id string) (*models.User, *customError.CustomError)
+	UpdateUserProfile(user models.User) (bool, *customError.CustomError)
 }
 
 type ServiceRepository struct {
@@ -28,20 +29,20 @@ func NewUserRepository(db *mongo.Client) UserRepository {
 	return &ServiceRepository{Repository: NewRepository(db)}
 }
 
-func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, error) {
+func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, *customError.CustomError) {
 
 	_, errExist, _ := repo.IsUserExist(user.Email)
 
 	if errExist {
-		return nil, errors.New("User already exist")
+		return nil, customError.ThrowError("BadRequest", errors.New("User already exist"))
 	}
 
 	if len(user.Email) == 0 {
-		return nil, errors.New("Missing email")
+		return nil, customError.ThrowError("BadRequest", errors.New("Missing email"))
 	}
 
 	if len(user.Password) < 6 {
-		return nil, errors.New("Password has to be more than y characters")
+		return nil, customError.ThrowError("BadRequest", errors.New("Password has to be more than y characters"))
 	}
 
 	newUser := &models.User{
@@ -59,16 +60,16 @@ func (repo *ServiceRepository) Singup(user *models.SingupUser) (*models.User, er
 	_, err := repo.StoreUser(newUser)
 
 	if err != nil {
-		return nil, err
+		return nil, customError.ThrowError("BadServerError", err)
 	}
 
 	return newUser, nil
 }
 
-func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserToken, error) {
+func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserToken, *customError.CustomError) {
 
 	if userLogin.Email == " " || len(userLogin.Password) < 6 {
-		return nil, errors.New("Email/Password are incorect")
+		return nil, customError.ThrowError("BadRequest", errors.New("Email/Password are incorect"))
 	}
 
 	user, foundUser, _ := repo.IsUserExist(userLogin.Email)
@@ -79,19 +80,19 @@ func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserT
 	pwdErr := bcrypt.CompareHashAndPassword(hashedPwd, userPwd)
 
 	if foundUser == false || pwdErr != nil {
-		return nil, errors.New("Password / Email was wrong")
+		return nil, customError.ThrowError("Unauthorized", errors.New("Password / Email was wrong"))
 	}
 
 	setting, errSetting := config.GetConfig()
 
 	if errSetting != nil {
-		return nil, errSetting
+		return nil, customError.ThrowError("BadServerError", errSetting)
 	}
 
 	tokenSigned, errToken := utils.BuildJWT(user, setting.Token.Secret)
 
 	if errToken != nil {
-		return nil, errToken
+		return nil, customError.ThrowError("Unauthorized", errToken)
 	}
 
 	token := &models.UserToken{Token: tokenSigned}
@@ -99,18 +100,18 @@ func (repo *ServiceRepository) Login(userLogin *models.UserLogin) (*models.UserT
 	return token, nil
 }
 
-func (repo *ServiceRepository) GetUserProfile(id string) (profile *models.User, err error) {
-	profile, err = repo.getUserById(id)
+func (repo *ServiceRepository) GetUserProfile(id string) (*models.User, *customError.CustomError) {
+	profile, err := repo.getUserById(id)
 
 	if err != nil {
-		return nil, err
+		return nil, customError.ThrowError("BadServerError", err)
 	}
 
 	return profile, nil
 
 }
 
-func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, error) {
+func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, *customError.CustomError) {
 	userProfile := make(map[string]interface{})
 
 	fields := reflect.TypeOf(user)
@@ -129,7 +130,7 @@ func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, error)
 	updated, err := repo.updateUserProfile(userProfile, utils.Claim.ID)
 
 	if err != nil {
-		return false, err
+		return false, customError.ThrowError("BadServerError", err)
 	}
 
 	return updated, nil
