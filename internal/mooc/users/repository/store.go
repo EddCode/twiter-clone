@@ -11,15 +11,7 @@ import (
 
 var collectionName string = "Users"
 
-type Repository struct {
-	connection *mongo.Client
-}
-
-func NewRepository(db *mongo.Client) *Repository {
-	return &Repository{connection: db}
-}
-
-func (repo *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
+func (repo *storage.Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
 	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
 
@@ -40,7 +32,7 @@ func (repo *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, er
 	return result, nil
 }
 
-func (repo *Repository) IsUserExist(email string) (*models.User, bool, string) {
+func (repo *storage.Repository) IsUserExist(email string) (*models.User, bool, string) {
 	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
 
@@ -59,7 +51,7 @@ func (repo *Repository) IsUserExist(email string) (*models.User, bool, string) {
 
 }
 
-func (repo *Repository) getUserById(id string) (*models.User, error) {
+func (repo *storage.Repository) getUserById(id string) (*models.User, error) {
 	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
 
@@ -78,19 +70,15 @@ func (repo *Repository) getUserById(id string) (*models.User, error) {
 
 }
 
-func (repo *Repository) updateUserProfile(user interface{}, id primitive.ObjectID) (bool, error) {
+func (repo *storage.Repository) updateUserProfile(user map[string]interface{}, id primitive.ObjectID) (bool, error) {
 	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
 	defer cancel()
-
-	condition := bson.M{
-		"_id": bson.M{"$eq": id},
-	}
 
 	updatedData := bson.M{
 		"$set": user,
 	}
 
-	_, mongoError := collection.UpdateOne(ctx, condition, updatedData)
+	_, mongoError := collection.UpdateByID(ctx, id, updatedData)
 
 	if mongoError != nil {
 		return false, mongoError

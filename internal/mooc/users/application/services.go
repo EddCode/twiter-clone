@@ -33,10 +33,10 @@ func (service *Service) SingupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newUser, err := service.userRepository.Singup(&user)
+	newUser, userErr := service.userRepository.Singup(&user)
 
 	if err != nil {
-		httpresponse.Error(err.Error(), err.Error()).Send(w)
+		httpresponse.Error(userErr.ErrorType(), err.Error()).Send(w)
 		return
 	}
 

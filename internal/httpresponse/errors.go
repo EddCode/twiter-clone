@@ -20,7 +20,7 @@ func notFound(msg string) httpError {
 }
 
 func unauthoriedRequest(msg string) httpError {
-	return httpError{StatusCode: http.StatusUnauthorized, Type: "Unauthorze", Message: msg}
+	return httpError{StatusCode: http.StatusUnauthorized, Type: "Unauthorized", Message: msg}
 }
 
 func internalServerError(msg string) httpError {
@@ -33,7 +33,7 @@ func Error(errorType string, msg string) httpError {
 	switch errorType {
 	case "Unauthorized":
 		err = unauthoriedRequest(msg)
-	case "Unknown":
+	case "NotFound":
 		err = notFound(msg)
 	case "BadRequest":
 		err = badRequest(msg)
