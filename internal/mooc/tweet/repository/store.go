@@ -10,8 +10,16 @@ import (
 
 var collectionName string = 'Tweet'
 
-func (repo *storage.Repository) saveTweet(tweet *models.Tweet) (*mongo.InsertOneResult, error) {
-	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+type TweetRepository struct {
+	Connection *mongo.Client
+}
+
+func NewRepository(db *mongo.Client) *Repository {
+	return &Repository{Connection: db}
+}
+
+func (db *TweetRepository) SaveTweet(tweet *models.Tweet) (*mongo.InsertOneResult, error) {
+	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	row := bson.M{

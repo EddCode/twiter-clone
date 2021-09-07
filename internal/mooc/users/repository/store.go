@@ -11,8 +11,16 @@ import (
 
 var collectionName string = "Users"
 
-func (repo *storage.Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
-	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+type Repository struct {
+	Connection *mongo.Client
+}
+
+func NewRepository(db *mongo.Client) *Repository {
+	return &Repository{Connection: db}
+}
+
+func (db *Repository) StoreUser(user *models.User) (*mongo.InsertOneResult, error) {
+	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	password, errToHash := utils.HashPassword(user.Password, 6)
@@ -32,8 +40,8 @@ func (repo *storage.Repository) StoreUser(user *models.User) (*mongo.InsertOneRe
 	return result, nil
 }
 
-func (repo *storage.Repository) IsUserExist(email string) (*models.User, bool, string) {
-	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+func (db *Repository) IsUserExist(email string) (*models.User, bool, string) {
+	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	condition := bson.M{"email": email}
@@ -51,8 +59,8 @@ func (repo *storage.Repository) IsUserExist(email string) (*models.User, bool, s
 
 }
 
-func (repo *storage.Repository) getUserById(id string) (*models.User, error) {
-	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+func (db *Repository) getUserById(id string) (*models.User, error) {
+	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	objectId, _ := primitive.ObjectIDFromHex(id)
@@ -70,8 +78,8 @@ func (repo *storage.Repository) getUserById(id string) (*models.User, error) {
 
 }
 
-func (repo *storage.Repository) updateUserProfile(user map[string]interface{}, id primitive.ObjectID) (bool, error) {
-	collection, ctx, cancel := storage.DBCollection(repo.connection, collectionName)
+func (db *Repository) updateUserProfile(user map[string]interface{}, id primitive.ObjectID) (bool, error) {
+	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	updatedData := bson.M{
