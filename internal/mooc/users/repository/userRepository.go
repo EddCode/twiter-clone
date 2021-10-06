@@ -2,8 +2,6 @@ package users
 
 import (
 	"errors"
-	"reflect"
-	"strings"
 
 	"github.com/EddCode/twitter-clone/cmd/config"
 	"github.com/EddCode/twitter-clone/internal/application/customError"
@@ -114,17 +112,47 @@ func (repo *ServiceRepository) GetUserProfile(id string) (*models.User, *customE
 func (repo *ServiceRepository) UpdateUserProfile(user models.User) (bool, *customError.CustomError) {
 	userProfile := make(map[string]interface{})
 
-	fields := reflect.TypeOf(user)
-	values := reflect.ValueOf(user)
+	//fields := reflect.TypeOf(user)
+	//values := reflect.ValueOf(user)
 
-	for i := 0; i < fields.NumField(); i++ {
-		field := fields.Field(i)
-		value := values.Field(i)
+	//for i := 0; i < fields.NumField(); i++ {
+	//	field := fields.Field(i)
+	//	value := values.Field(i)
 
-		if !value.IsZero() {
-			key := strings.ToLower(field.Name)
-			userProfile[key] = value
-		}
+	//	if !value.IsZero() {
+	//		key := strings.ToLower(field.Name)
+	//		userProfile[key] = value
+	//	}
+	//}
+
+	//userProfile["banner"] = "Super Banner"
+
+	if len(user.Phone) > 0 {
+		userProfile["phone"] = user.Phone
+	}
+
+	if len(user.FullName) > 0 {
+		userProfile["name"] = user.FullName
+	}
+
+	if len(user.Email) > 0 {
+		userProfile["Email"] = user.Email
+	}
+
+	if len(user.Avatar) > 0 {
+		userProfile["avatar"] = user.Avatar
+	}
+
+	if len(user.Banner) > 0 {
+		userProfile["banner"] = user.Banner
+	}
+
+	if len(user.Avatar) > 0 {
+		userProfile["biography"] = user.Biography
+	}
+
+	if len(user.Location) > 0 {
+		userProfile["location"] = user.Location
 	}
 
 	updated, err := repo.updateUserProfile(userProfile, utils.Claim.ID)
