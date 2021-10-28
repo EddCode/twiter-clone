@@ -24,7 +24,7 @@ func unauthoriedRequest(msg string) httpError {
 }
 
 func internalServerError(msg string) httpError {
-	return httpError{StatusCode: http.StatusInternalServerError, Type: "Unauthorze", Message: msg}
+	return httpError{StatusCode: http.StatusInternalServerError, Type: "InternalServerError", Message: msg}
 }
 
 func Error(errorType string, msg string) httpError {

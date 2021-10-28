@@ -11,16 +11,16 @@ import (
 )
 
 type TweetService struct {
-	tweet tweet.TweetRepository
+	tweet tweet.TweetInterface
 }
 
-func NewTweetService(db *mongo.Client) TweetService {
+func NewTweetService(db *mongo.Client) *TweetService {
 	return &TweetService{
-		tweet: tweet.NewTweetRepo(db)
+		tweet: tweet.NewTweetRepo(db),
 	}
 }
 
-func (service *TweetService) SaveHandler(w http.ResponseWriter, r *http.Request){
+func (service *TweetService) SaveHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.Body
 	defer body.Close()
 
@@ -28,7 +28,7 @@ func (service *TweetService) SaveHandler(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(body).Decode(&tweet)
 
 	if err != nil {
-		httpresponse.Error("BadRequest", "Wrong parameters").Send()
+		httpresponse.Error("BadRequest", "Wrong parameters").Send(w)
 		return
 	}
 
@@ -39,5 +39,5 @@ func (service *TweetService) SaveHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	httpresponse.Success('success').Send(w)
+	httpresponse.Success("success", http.StatusCreated).Send(w)
 }

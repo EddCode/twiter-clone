@@ -1,31 +1,30 @@
 package tweet
 
 import (
-	models "github.com/EddCode/twitter-clone/internal/mooc/Tweet/domain"
-	tweet "github.com/EddCode/twitter-clone/internal/mooc/Tweet/domain"
+	tweet "github.com/EddCode/twitter-clone/internal/mooc/tweet/domain"
 	"github.com/EddCode/twitter-clone/internal/storage"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var collectionName string = 'Tweet'
+var collectionName string = "Tweet"
 
 type TweetRepository struct {
 	Connection *mongo.Client
 }
 
-func NewRepository(db *mongo.Client) *Repository {
-	return &Repository{Connection: db}
+func NewRepository(db *mongo.Client) *TweetRepository {
+	return &TweetRepository{Connection: db}
 }
 
-func (db *TweetRepository) SaveTweet(tweet *models.Tweet) (*mongo.InsertOneResult, error) {
+func (db *TweetRepository) SaveTweet(tweet *tweet.Tweet) (*mongo.InsertOneResult, error) {
 	collection, ctx, cancel := storage.DBCollection(db.Connection, collectionName)
 	defer cancel()
 
 	row := bson.M{
-		"userid": tweet.UserId,
+		"userid":  tweet.UserId,
 		"message": tweet.Message,
-		"date": tweet.Date,
+		"date":    tweet.Date,
 	}
 
 	result, err := collection.InsertOne(ctx, row)
